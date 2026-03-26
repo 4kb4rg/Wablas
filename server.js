@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -7,6 +6,7 @@ const path = require('path');
 const logger = require('./src/utils/logger');
 const { connectDB } = require('./src/config/database');
 const { connectRedis } = require('./src/config/redis');
+const whatsappService = require('./src/services/whatsappService');
 
 const authRoutes = require('./src/routes/auth');
 const deviceRoutes = require('./src/routes/device');
@@ -33,25 +33,26 @@ app.use('/api/report', reportRoutes);
 
 app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'WhatsApp Gateway Running', version: '1.0.0' });
-  });
+});
 
-  app.use((err, req, res, next) => {
-    logger.error(err.stack);
-      res.status(500).json({ status: false, message: 'Internal Server Error' });
-      });
+app.use((err, req, res, next) => {
+  logger.error(err.stack);
+  res.status(500).json({ status: false, message: 'Internal Server Error' });
+});
 
-      const start = async () => {
-        try {
-            await connectDB();
-                await connectRedis();
-                    app.listen(PORT, () => {
-                          logger.info(`Server running on port ${PORT}`);
-                              });
-                                } catch (error) {
-                                    logger.error('Failed to start server:', error);
-                                        process.exit(1);
-                                          }
-                                          };
+const start = async () => {
+  try {
+    await connectDB();
+    await connectRedis();
+    app.listen(PORT, () => {
+      logger.info('Server running on port ' + PORT);
+    });
+    await whatsappService.restoreActiveSessions();
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
 
-                                          start();
-                                          module.exports = app;
+start();
+module.exports = app;
