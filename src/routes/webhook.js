@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const webhookController = require('../controllers/webhookController');
-const { authMiddleware } = require('../middlewares/auth');
+const { authenticate } = require('../middlewares/auth');
 
-router.put('/set/:deviceId', authMiddleware, webhookController.setWebhook);
-router.delete('/remove/:deviceId', authMiddleware, webhookController.removeWebhook);
-router.post('/incoming/:token', webhookController.handleIncoming);
+router.get('/:id', authenticate, webhookController.getWebhook);
+router.post('/:id', authenticate, webhookController.setWebhook);
+router.delete('/:id', authenticate, webhookController.deleteWebhook);
+router.post('/:id/test', authenticate, webhookController.testWebhook);
+router.post('/incoming/:token', webhookController.receiveIncoming);
 
 module.exports = router;
