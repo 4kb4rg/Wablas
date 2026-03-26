@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const broadcastController = require('../controllers/broadcastController');
-const { deviceTokenMiddleware } = require('../middlewares/auth');
+const { authenticate } = require('../middlewares/auth');
 
-router.use(deviceTokenMiddleware);
+router.use(authenticate);
 
 router.post('/send', broadcastController.sendBroadcast);
 router.get('/history', broadcastController.getBroadcastHistory);
